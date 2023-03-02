@@ -9,17 +9,22 @@ jobs:
       id-token: write
       packages: write
     steps:
-    - name: Push image with docker
-      run: |
-        docker pull alpine:latest
-        docker tag alpine:latest "${IMAGE}"
-        docker push "${IMAGE}"
-    - name: Sign image with cosign
-      run: |
-        env > github-actions.txt
-        docker run --rm --env-file=./github-actions.txt \
-          cgr.dev/chainguard/cosign \
-          sign "${IMAGE}" \
-            -a sha=${{ github.sha }} \
-            -a run_id=${{ github.run_id }} \
-            -a run_attempt=${{ github.run_attempt }}
+      - name: Login to registry
+        run: |
+          echo "${{ github.token }}" | docker login \
+            -u "${{ github.repository_owner }}" \
+            --password-stdin ghcr.io
+      - name: Push image with docker
+        run: |
+          docker pull alpine:latest
+          docker tag alpine:latest "${IMAGE}"
+          docker push "${IMAGE}"
+      - name: Sign image with cosign
+        run: |
+          env > github-actions.txt
+          docker run --rm --env-file=./github-actions.txt \
+            cgr.dev/chainguard/cosign \
+            sign "${IMAGE}" \
+              -a sha=${{ github.sha }} \
+              -a run_id=${{ github.run_id }} \
+              -a run_attempt=${{ github.run_attempt }}
