@@ -26,6 +26,7 @@ jobs:
           set -x
           env | grep -v ^HOME= > github-actions.txt
           docker run --rm --env-file=./github-actions.txt \
+            -v "${HOME}/.docker:/home/nonroot/.docker" \
             cgr.dev/chainguard/cosign \
             sign "${IMAGE}" \
               --yes \
