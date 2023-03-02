@@ -1,0 +1,24 @@
+on:
+  push:
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+jobs:
+  push-and-sign:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+    steps:
+    - name: Push image with docker
+      run: |
+        docker pull alpine:latest
+        docker tag alpine:latest "${IMAGE}"
+        docker push "${IMAGE}"
+    - name: Sign image with cosign
+        env > github-actions.txt
+        docker run --rm --env-file=./github-actions.txt \
+          cgr.dev/chainguard/cosign \
+          sign "${IMAGE}" \
+            -a sha=${{ github.sha }} \
+            -a run_id=${{ github.run_id }} \
+            -a run_attempt=${{ github.run_attempt }}
