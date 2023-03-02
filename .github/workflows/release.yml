@@ -15,6 +15,7 @@ jobs:
         docker tag alpine:latest "${IMAGE}"
         docker push "${IMAGE}"
     - name: Sign image with cosign
+      run: |
         env > github-actions.txt
         docker run --rm --env-file=./github-actions.txt \
           cgr.dev/chainguard/cosign \
